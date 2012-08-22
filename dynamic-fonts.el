@@ -47,7 +47,7 @@
 ;;    where supported, font information can be cached to disk.
 ;;
 ;;    dynamic-fonts-font-exists-p only supports two styles of font
-;;    name.   This page
+;;    name. This page
 ;;
 ;;       http://www.gnu.org/software/emacs/manual/html_node/emacs/Fonts.html#Fonts
 ;;
@@ -369,52 +369,53 @@ must \(leniently\) match."
         (t
          (let ((font-name-list        nil)
                (fontconfig-params     ""))
-          ;; read all fonts if possible
-          (dynamic-fonts-load-font-names (not dynamic-fonts-less-feedback))
 
-          ;; clean up name and set point-size.  Priority
-          ;;    argument to function
+           ;; read all fonts if possible
+           (dynamic-fonts-load-font-names (not dynamic-fonts-less-feedback))
+
+           ;; clean up name and set point-size.  Priority
+           ;;    argument to function
            ;;    font-spec property
-          ;;    fontconfig-style parameter
-          ;;    fontconfig-style trailing size
-          (when (string-match "\\(:.*\\)\\'" font-name)
-            (setq fontconfig-params (match-string 1 font-name))
-            (setq font-name (replace-match "" t t font-name))
-            (when (string-match "\\<size=\\([0-9.]+\\)" fontconfig-params)
-              (callf or point-size (string-to-number (match-string 1 fontconfig-params)))
-              (setq fontconfig-params (replace-match "" t t fontconfig-params))))
-          (when (string-match "-\\([0-9.]+\\)\\'" font-name)
-            (callf or point-size (string-to-number (match-string 1 font-name)))
-            (setq font-name (replace-match "" t t font-name)))
+           ;;    fontconfig-style parameter
+           ;;    fontconfig-style trailing size
+           (when (string-match "\\(:.*\\)\\'" font-name)
+             (setq fontconfig-params (match-string 1 font-name))
+             (setq font-name (replace-match "" t t font-name))
+             (when (string-match "\\<size=\\([0-9.]+\\)" fontconfig-params)
+               (callf or point-size (string-to-number (match-string 1 fontconfig-params)))
+               (setq fontconfig-params (replace-match "" t t fontconfig-params))))
+           (when (string-match "-\\([0-9.]+\\)\\'" font-name)
+             (callf or point-size (string-to-number (match-string 1 font-name)))
+             (setq font-name (replace-match "" t t font-name)))
            (when (stringp point-size)
              (callf string-to-number point-size))
            (when (numberp point-size)
              (callf concat fontconfig-params (format ":size=%s" (round point-size))))
-          (setq fontconfig-params (replace-regexp-in-string "::+" ":" fontconfig-params))
+           (setq fontconfig-params (replace-regexp-in-string "::+" ":" fontconfig-params))
 
-          ;; generate list of font names to try
-          (setq font-name-list (if strict
-                                   (list font-name)
-                                 (dynamic-fonts-create-fuzzy-matches font-name)))
+           ;; generate list of font names to try
+           (setq font-name-list (if strict
+                                    (list font-name)
+                                  (dynamic-fonts-create-fuzzy-matches font-name)))
 
-          ;; constrain font list to scope requested
-          (when scope
-            (callf2 intersection scope font-name-list        :test 'dynamic-fonts-lenient-font-name-equal))
+           ;; constrain font list to scope requested
+           (when scope
+             (callf2 intersection scope font-name-list :test 'dynamic-fonts-lenient-font-name-equal))
 
-          ;; constrain font list by font cache if possible
-          (when (and dynamic-fonts-use-memory-cache
-                     (hash-table-p dynamic-fonts-font-names))
-            (setq font-name-list (remove-if-not #'(lambda (key)
-                                                    (gethash (upcase (replace-regexp-in-string "-[0-9.]+\\'" "" key)) dynamic-fonts-font-names))
-                                                font-name-list)))
-          ;; find the font
-          (catch 'font
-            (dolist (name font-name-list)
-              (let* ((query-name (concat name fontconfig-params))
-                     (font-vec (with-local-quit (ignore-errors (font-info query-name)))))
-                (when (and font-vec
-                           (or (find-font (font-spec :name name))    ; verify - some systems return the
-                               (find-font (font-spec :family name))) ; default face on font-info failure
+           ;; constrain font list by font cache if possible
+           (when (and dynamic-fonts-use-memory-cache
+                      (hash-table-p dynamic-fonts-font-names))
+             (setq font-name-list (remove-if-not #'(lambda (key)
+                                                     (gethash (upcase (replace-regexp-in-string "-[0-9.]+\\'" "" key)) dynamic-fonts-font-names))
+                                                 font-name-list)))
+           ;; find the font
+           (catch 'font
+             (dolist (name font-name-list)
+               (let* ((query-name (concat name fontconfig-params))
+                      (font-vec (with-local-quit (ignore-errors (font-info query-name)))))
+                 (when (and font-vec
+                            (or (find-font (font-spec :name name))    ; verify - some systems return the
+                                (find-font (font-spec :family name))) ; default face on font-info failure
                             (or (not (numberp point-size))
                                 (= point-size (aref font-vec 2))))
                    (throw 'font font-vec)))))))))))

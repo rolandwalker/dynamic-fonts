@@ -367,7 +367,7 @@ must \(leniently\) match."
         ((vectorp font-name)
           font-name)
         (t
-        (let* ((font-name-list        nil)
+         (let ((font-name-list        nil)
                (fontconfig-params     ""))
           ;; read all fonts if possible
           (dynamic-fonts-load-font-names (not dynamic-fonts-less-feedback))

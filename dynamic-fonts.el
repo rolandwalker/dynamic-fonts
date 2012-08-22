@@ -58,6 +58,9 @@
 ;;    test whether (find-font (font-spec :name "Name")) is faster
 ;;    than font-info
 ;;
+;;    dynamic-fonts-create-fuzzy-matches not exhaustive enough to
+;;    catch all typos
+;;
 ;;; License
 ;;
 ;; Simplified BSD License:

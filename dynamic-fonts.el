@@ -58,10 +58,6 @@
 ;;    name ("Lucida Typewriter-12"), the size returned is always
 ;;    larger.  Needs testing on other X11 servers.
 ;;
-;;    A bogus short name such as "M" may be allowed to match the default
-;;    font in dynamic-fonts-font-exists-p if the system returns the
-;;    default font on failure of font-info (eg Cocoa).
-;;
 ;; TODO
 ;;
 ;;    test whether (find-font (font-spec :name "Name")) is faster
@@ -263,34 +259,6 @@ default for fixed-width faces."
 
 (defvar dynamic-fonts-font-names nil "Hash of all font names.")
 
-(defvar dynamic-fonts-font-info-workaround '(                                       ;
-                                             ;; exact FULL-NAME     . regexp matching arg to font-info
-                                             ("CooperBlackStd"      . "\\`#?Cooper[ \t_-]*Std\\'")
-                                             ("DFKaiShu-SB-Estd-BF" . "\\`#?Biau[ \t_-]*Kai\\'")
-                                             ("GaramondPremrPro"    . "\\`#?Garamond[ \t_-]*Premier[ \t_-]*Pro\\'")
-                                             ("HiraKakuPro-W3"      . "\\`#?Hiragino[ \t_-]*Kaku[ \t_-]*Gothic[ \t_-]*Pro\\'")
-                                             ("HiraKakuProN-W3"     . "\\`#?Hiragino[ \t_-]*Kaku[ \t_-]*Gothic[ \t_-]*Pro[ \t_-]*N\\'")
-                                             ("HiraKakuStd-W8"      . "\\`#?Hiragino[ \t_-]*Kaku[ \t_-]*Gothic[ \t_-]*Std\\'")
-                                             ("HiraKakuStdN-W8"     . "\\`#?Hiragino[ \t_-]*Kaku[ \t_-]*Gothic[ \t_-]*Std[ \t_-]*N\\'")
-                                             ("HiraMaruPro-W4"      . "\\`#?Hiragino[ \t_-]*Maru[ \t_-]*Gothic[ \t_-]*Pro\\'")
-                                             ("HiraMaruProN-W4"     . "\\`#?Hiragino[ \t_-]*Maru[ \t_-]*Gothic[ \t_-]*Pro[ \t_-]*N\\'")
-                                             ("HiraMinPro-W3"       . "\\`#?Hiragino[ \t_-]*Mincho[ \t_-]*Pro\\'")
-                                             ("HiraMinProN-W3"      . "\\`#?Hiragino[ \t_-]*Mincho[ \t_-]*Pro[ \t_-]*N\\'")
-                                             ("JCHEadA"             . "\\`#?head[ \t_-]*line[ \t_-]*a\\'")
-                                             ("JCfg"                . "\\`#?Pilgi")
-                                             ("JCkg"                . "\\`#?gung[ \t_-]*seo")
-                                             ("JCsmPC"              . "\\`#?P[ \t_-]*C[ \t_-]*Myung[ \t_-]*jo\\'")
-                                             ("JCsmPC"              . "\\`#?P[ \t_-]*C[ \t_-]*Myung[ \t_-]*jo\\'")
-                                             ("LiGothicMed"         . "\\`#?Apple[ \t_-]*Li[ \t_-]*Gothic\\'")
-                                             ("LiSungLight"         . "\\`#?Apple[ \t_-]*Li[ \t_-]*Sung\\'")
-                                             ("NanumBrush"          . "\\`#?Nanum[ \t_-]*Brush[ \t_-]*Script\\'")
-                                             ("NanumPen"            . "\\`#?Nanum[ \t_-]*Pen[ \t_-]*Script\\'")
-                                             ("SIL-Hei-Med-Jian"    . "\\`#?Hei\\'")
-                                             ("SIL-Kai-Reg-Jian"    . "\\`#?Kai\\'")
-                                             ("STKaiti-SC-Regular"  . "\\`#?Kaiti[ \t_-]*S[ \t_-]*C\\'")
-                                             ("STXihei"             . "\\`#?S[ \t_-]*T[ \t_-]*Heiti\\'")
-                                             ) "Overrides for fonts that return a non-matching FULL-NAME in `font-info'.")
-
 ;;; compatibility functions
 
 (unless (fboundp 'memoize)
@@ -380,9 +348,7 @@ When POINT-SIZE is set, check for a specific font size.  Size may
 also be given at the end of a string FONT-NAME, eg \"Monaco-12\".
 
 When optional STRICT is given, FONT-NAME must will not be
-leniently modified before passing to `font-info', and must
-exactly match the string at the FULL-NAME element in the
-returned font vector, or the family name in the XLFD string.
+leniently modified before passing to `font-info'.
 
 Optional SCOPE is a list of font names, within which FONT-NAME
 must \(leniently\) match."
@@ -392,80 +358,53 @@ must \(leniently\) match."
           font-name
         ;; else
         (let* ((font-name-list        nil)
-               (font-name-list-nosize nil)
-               (font-name-params      nil)              ; fontconfig-style parameters
-               (font-name-regexp      nil))
+               (fontconfig-params     ""))
+          ;; read all fonts if possible
           (dynamic-fonts-load-font-names (not dynamic-fonts-less-feedback))
-          (when (string-match ":\\(.*\\)\\'" font-name)
-            (setq font-name-params (match-string 1 font-name))
+
+          ;; clean up name and set point-size.  Priority
+          ;;    argument to function
+          ;;    fontconfig-style parameter
+          ;;    fontconfig-style trailing size
+          (when (string-match "\\(:.*\\)\\'" font-name)
+            (setq fontconfig-params (match-string 1 font-name))
+            (setq font-name (replace-match "" t t font-name))
+            (when (string-match "\\<size=\\([0-9.]+\\)" fontconfig-params)
+              (callf or point-size (string-to-number (match-string 1 fontconfig-params)))
+              (setq fontconfig-params (replace-match "" t t fontconfig-params))))
+          (when (string-match "-\\([0-9.]+\\)\\'" font-name)
+            (callf or point-size (string-to-number (match-string 1 font-name)))
             (setq font-name (replace-match "" t t font-name)))
-          (if strict
-              (progn
-                (setq font-name-list (list font-name))
-                (setq font-name-list-nosize (list font-name))
-                (setq font-name-regexp (concat "\\`" (regexp-quote font-name) "\\'")))
-            ;; else
-            (setq font-name-list (dynamic-fonts-create-fuzzy-matches font-name 'keep-size))
-            (when (string-match "-\\([0-9.]+\\)\\'" font-name)
-              (callf or point-size (string-to-number (match-string-no-properties 1 font-name))))
-            (setq font-name-list-nosize (mapcar #'(lambda (x) (replace-regexp-in-string "-[0-9.]+\\'" "" x)) font-name-list))
-            (setq font-name-regexp (concat "\\`" (regexp-opt font-name-list-nosize 'paren))))
-          (when (and (not point-size)
-                     font-name-params
-                     (string-match "\\<size=\\([0-9.]+\\)" font-name-params))
-            (setq point-size (match-string 1 font-name-params)))
           (when point-size
-            (setq font-name-list (mapcar #'(lambda (x) (format "%s:size=%s" x point-size)) font-name-list-nosize)))
-          (unless strict
-            (setq case-fold-search t))
+            (callf concat fontconfig-params (format ":size=%s" point-size)))
+          (setq fontconfig-params (replace-regexp-in-string "::+" ":" fontconfig-params))
+
+          ;; generate list of font names to try
+          (setq font-name-list (if strict
+                                   (list font-name)
+                                 (dynamic-fonts-create-fuzzy-matches font-name)))
+
+          ;; constrain font list to scope requested
           (when scope
-            (callf2 intersection scope font-name-list-nosize :test 'dynamic-fonts-lenient-font-name-equal)
             (callf2 intersection scope font-name-list        :test 'dynamic-fonts-lenient-font-name-equal))
+
+          ;; constrain font list by font cache if possible
           (when (and dynamic-fonts-use-memory-cache
                      (hash-table-p dynamic-fonts-font-names))
-            (setq font-name-list-nosize (remove-if-not #'(lambda (key)
-                                                           (gethash (upcase key) dynamic-fonts-font-names))
-                                                       font-name-list-nosize))
-            (setq font-name-list        (remove-if-not #'(lambda (key)
-                                                           (gethash (upcase (replace-regexp-in-string "-[0-9.]+\\'" "" key)) dynamic-fonts-font-names))
-                                                       font-name-list)))
-          ;; using find-font to return a font object makes more sense, but
-          ;; font-info does a better job of normalizing the family name - why?
-          ;; (catch 'font
-          ;;   (dolist (name font-name-list)
-          ;;     (let* ((font-obj (or (find-font (font-spec :name name))
-          ;;                          (find-font (font-spec :family name))))
-          ;;            (font-name nil)
-          ;;            (alt-font-name nil))
-          ;;       (when font-obj
-          ;;         (setq font-name (font-get font-obj :name))
-          ;;         (setq alt-font-name (font-get font-obj :family))
-          ;;         (when (or (dynamic-fonts-lenient-font-name-equal name font-name)
-          ;;                   (dynamic-fonts-lenient-font-name-equal name alt-font-name))
-          ;;           (when point-size
-          ;;             (font-put :size (float point-size)))
-          ;;             (throw 'font font-obj)))))))))))
+            (setq font-name-list (remove-if-not #'(lambda (key)
+                                                    (gethash (upcase (replace-regexp-in-string "-[0-9.]+\\'" "" key)) dynamic-fonts-font-names))
+                                                font-name-list)))
+          ;; find the font
           (catch 'font
             (dolist (name font-name-list)
-              (let* ((font-vec (with-local-quit (ignore-errors (font-info name))))
-                     (font-name nil)
-                     (alt-font-name nil))
-                (when font-vec
-                  ;; maybe matching the name field of the vector was a mistake, everything
-                  ;; else is working off the XLFD at this point
-                  (setq font-name (car (split-string (aref font-vec 1) ":")))
-                  (setq alt-font-name (dynamic-fonts-font-name-from-xlfd (aref font-vec 0)))
-                  (when (or (string-match-p font-name-regexp font-name)
-                            (string-match-p font-name-regexp alt-font-name)
-                            (and (not strict)
-                                 (assoc font-name dynamic-fonts-font-info-workaround)
-                                 (remove-if-not #'(lambda (x)
-                                                    (let ((case-fold-search t))
-                                                      (string-match-p (cdr (assoc font-name dynamic-fonts-font-info-workaround)) x)))
-                                                font-name-list)))
-                    (when (or (not point-size)
-                              (eq point-size (aref font-vec 2)))
-                      (throw 'font font-vec))))))))))))
+              (let* ((query-name (concat name fontconfig-params))
+                     (font-vec (with-local-quit (ignore-errors (font-info query-name)))))
+                (when (and font-vec
+                           (or (find-font (font-spec :name name))    ; verify - some systems return the
+                               (find-font (font-spec :family name))) ; default face on font-info failure
+                           (or (not point-size)
+                               (eq point-size (aref font-vec 2))))
+                  (throw 'font font-vec))))))))))
 (memoize 'dynamic-fonts-font-exists-p)
 
 ;;;###autoload

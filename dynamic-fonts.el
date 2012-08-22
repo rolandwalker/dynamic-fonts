@@ -341,6 +341,8 @@ Uses `ido-completing-read' if optional IDO is set."
   "Test whether FONT-NAME (a string or font object) exists.
 
 FONT-NAME is a string, typically in Fontconfig font-name format.
+A font-spec, font-vector, or font-object are accepted, though
+the behavior for the latter two is not well defined.
 
 Returns a matching font vector.
 
@@ -354,9 +356,17 @@ Optional SCOPE is a list of font names, within which FONT-NAME
 must \(leniently\) match."
   (when (display-multi-font-p)
     (save-match-data
-      (if (fontp font-name 'font-object)
-          font-name
-        ;; else
+      (when (fontp font-name 'font-spec)
+        (when (and (floatp (font-get font-name :size))
+                   (not point-size))
+          (setq point-size (font-get font-name :size)))
+        (setq font-name (or (font-get font-name :name) (font-get font-name :family))))
+      (cond
+        ((fontp font-name 'font-entity)
+         (font-info font-name))
+        ((vectorp font-name)
+          font-name)
+        (t
         (let* ((font-name-list        nil)
                (fontconfig-params     ""))
           ;; read all fonts if possible
@@ -364,6 +374,7 @@ must \(leniently\) match."
 
           ;; clean up name and set point-size.  Priority
           ;;    argument to function
+           ;;    font-spec property
           ;;    fontconfig-style parameter
           ;;    fontconfig-style trailing size
           (when (string-match "\\(:.*\\)\\'" font-name)

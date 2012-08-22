@@ -53,11 +53,6 @@
 ;;
 ;;    describes four styles of font name.
 ;;
-;;    Passing point size to dynamic-fonts-font-exists-p not working
-;;    well under XQuartz.  When requesting with a size appended to
-;;    name ("Lucida Typewriter-12"), the size returned is always
-;;    larger.  Needs testing on other X11 servers.
-;;
 ;; TODO
 ;;
 ;;    test whether (find-font (font-spec :name "Name")) is faster

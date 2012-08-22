@@ -386,8 +386,10 @@ must \(leniently\) match."
           (when (string-match "-\\([0-9.]+\\)\\'" font-name)
             (callf or point-size (string-to-number (match-string 1 font-name)))
             (setq font-name (replace-match "" t t font-name)))
-          (when point-size
-            (callf concat fontconfig-params (format ":size=%s" point-size)))
+           (when (stringp point-size)
+             (callf string-to-number point-size))
+           (when (numberp point-size)
+             (callf concat fontconfig-params (format ":size=%s" (round point-size))))
           (setq fontconfig-params (replace-regexp-in-string "::+" ":" fontconfig-params))
 
           ;; generate list of font names to try
@@ -413,9 +415,9 @@ must \(leniently\) match."
                 (when (and font-vec
                            (or (find-font (font-spec :name name))    ; verify - some systems return the
                                (find-font (font-spec :family name))) ; default face on font-info failure
-                           (or (not point-size)
-                               (eq point-size (aref font-vec 2))))
-                  (throw 'font font-vec))))))))))
+                            (or (not (numberp point-size))
+                                (= point-size (aref font-vec 2))))
+                   (throw 'font font-vec)))))))))))
 (memoize 'dynamic-fonts-font-exists-p)
 
 ;;;###autoload

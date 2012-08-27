@@ -612,6 +612,7 @@ the values above as alternatives."
 ;; require-final-newline: t
 ;; coding: utf-8
 ;; byte-compile-warnings: (not cl-functions)
+;; no-byte-compile: t
 ;; End:
 ;;
 ;; LocalWords:  DynamicFonts XQuartz Lucida callf Segoe DejaVu Arial

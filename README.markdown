@@ -25,3 +25,9 @@ Notes
 The secondary purpose of this library is to provide some font
 utility functions to be called from Lisp.  See in particular
 `dynamic-fonts-font-exists-p`, which tests font availability.
+
+Compatibility and Requirements
+------------------------------
+Tested only on GNU Emacs version 24.1
+
+Requires persistent-soft.el

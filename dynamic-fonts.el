@@ -36,9 +36,11 @@
 ;; utility functions to be called from Lisp.  See in particular
 ;; `dynamic-fonts-font-exists-p', which tests font availability.
 ;;
-;; Compatibility
+;; Compatibility and Requirements
 ;;
 ;;     Tested only on GNU Emacs version 24.1
+;;
+;;     Requires persistent-soft.el
 ;;
 ;; Bugs
 ;;

@@ -112,6 +112,12 @@
 (autoload 'persistent-soft-exists-p  "persistent-soft" "Return t if SYMBOL exists in the LOCATION persistent data store."   t)
 (autoload 'persistent-soft-flush     "persistent-soft" "Flush data for the LOCATION data store to disk."                    t)
 
+(declare-function remove-if-not "cl-seq.el")
+(declare-function intersection  "cl-seq.el")
+(declare-function gensym        "cl-macs.el")
+(declare-function memoize       "memoize.el")
+(declare-function memoize-wrap  "memoize.el")
+
 ;;; customizable variables
 
 ;;;###autoload
@@ -603,6 +609,7 @@ the values above as alternatives."
 ;; mangle-whitespace: t
 ;; require-final-newline: t
 ;; coding: utf-8
+;; byte-compile-warnings: (not cl-functions)
 ;; End:
 ;;
 ;; LocalWords:  DynamicFonts XQuartz Lucida callf Segoe DejaVu Arial

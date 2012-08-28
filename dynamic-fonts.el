@@ -7,7 +7,7 @@
 ;; Version: 0.5.3
 ;; Last-Updated: 27 Aug 2012
 ;; EmacsWiki: DynamicFonts
-;; Keywords:
+;; Keywords: faces, frames
 ;; Package-Requires: ((persistent-soft "0.8.0") (pcache "0.2.3"))
 ;;
 ;; Simplified BSD License

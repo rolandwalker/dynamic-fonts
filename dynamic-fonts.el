@@ -308,12 +308,97 @@ delimiter, \"-\", is a legal character within fields."
                       (nthcdr 2 elts)))) "-")
       (nth 2 elts))))
 
+(defun dynamic-fonts-create-fuzzy-matches (font-name &optional keep-size)
+  "Return a list of approximate matches to FONT-NAME.
+
+If KEEP-SIZE is set, do not strip point sizes in the form
+
+   Font Name-pointsize"
+  (let ((case-fold-search  nil)
+        (font-name-uncamel nil)
+        (fuzzy-match-list (list font-name)))
+    (setq font-name (replace-regexp-in-string "\\`[ \t_]+" ""
+                       (replace-regexp-in-string "[ \t_]+\\'" ""
+                          (replace-regexp-in-string ":[^:]*\\'" ""
+                                font-name))))
+    (unless keep-size
+      (setq font-name (replace-regexp-in-string "[ \t]*-[0-9.]+\\'" "" font-name)))
+    (setq font-name-uncamel (replace-regexp-in-string "\\([a-z]\\)\\([A-Z]\\)" "\\1 \\2" font-name))
+    (push font-name                                                   fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t_]+"  ""  font-name        ) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t]"    "_" font-name        ) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t_]+"  " " font-name        ) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t_]+"  "_" font-name        ) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t]"    "-" font-name        ) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t]+"   "-" font-name        ) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t_-]+" "-" font-name        ) fuzzy-match-list)
+    (push font-name-uncamel                                           fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t]"    "_" font-name-uncamel) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t_]+"  " " font-name-uncamel) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t_]+"  "_" font-name-uncamel) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t]"    "-" font-name-uncamel) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t]+"   "-" font-name-uncamel) fuzzy-match-list)
+    (push (replace-regexp-in-string "[ \t_-]+" "-" font-name-uncamel) fuzzy-match-list)
+    (setq fuzzy-match-list (nreverse fuzzy-match-list))
+    (delete-dups fuzzy-match-list)
+    (remove-if-not #'(lambda (x) (string-match-p "[^ \t]" x)) fuzzy-match-list)))
+
 ;;;###autoload
 (defun dynamic-fonts-list-font-names ()
   "Return a list of all font names on the current system."
   (when (display-multi-font-p)
     (delete-dups (remove "nil" (remq nil (font-family-list))))))
 (memoize 'dynamic-fonts-list-font-names)
+
+(defun dynamic-fonts-load-font-names (&optional progress regenerate)
+  "Populate the hash `dynamic-fonts-font-names'.
+
+When optional PROGRESS is true, show progress feedback in the
+echo area.
+
+When optional REGENERATE is true, always rebuild from
+scratch."
+  (when (display-multi-font-p)
+    (when regenerate
+      (setq dynamic-fonts-font-names nil)
+      (persistent-soft-store (intern (format "checksum-%s" window-system))
+                             nil dynamic-fonts-use-persistent-storage)
+      (persistent-soft-store (intern (format "font-names-%s" window-system))
+                             nil dynamic-fonts-use-persistent-storage)
+      (persistent-soft-flush dynamic-fonts-use-persistent-storage))
+    (unless (or (hash-table-p dynamic-fonts-font-names)
+                (not dynamic-fonts-use-memory-cache))
+      (when progress
+        (message "Font cache ... checking"))
+      (let* ((old-checksum (persistent-soft-fetch (intern (format "checksum-%s" window-system)) dynamic-fonts-use-persistent-storage))
+             (listing (dynamic-fonts-list-font-names))
+             (new-checksum (md5 (mapconcat 'identity (sort listing 'string<) "") nil nil 'utf-8))
+             (dupes nil))
+        (when (equal old-checksum new-checksum)
+          (setq dynamic-fonts-font-names (persistent-soft-fetch
+                                          (intern (format "font-names-%s" window-system))
+                                          dynamic-fonts-use-persistent-storage)))
+        (unless (hash-table-p dynamic-fonts-font-names)
+          (when progress
+            (message "Font cache ... rebuilding"))
+          (setq dynamic-fonts-font-names (make-hash-table :size (* 5 (length listing)) :test 'equal))
+          (dolist (font-name listing)
+            (dolist (fuzzy-name (dynamic-fonts-create-fuzzy-matches font-name))
+              (callf upcase fuzzy-name)
+              (when (and (gethash fuzzy-name dynamic-fonts-font-names)
+                         (not (equal (gethash fuzzy-name dynamic-fonts-font-names) font-name)))
+                (push fuzzy-name dupes))
+              (puthash (upcase fuzzy-name) font-name dynamic-fonts-font-names)))
+          (delete-dups dupes)
+          (dolist (fuzzy-name dupes)
+            (remhash fuzzy-name dynamic-fonts-font-names))
+          (persistent-soft-store (intern (format "checksum-%s" window-system))
+                                 new-checksum dynamic-fonts-use-persistent-storage)
+          (persistent-soft-store (intern (format "font-names-%s" window-system))
+                                 dynamic-fonts-font-names dynamic-fonts-use-persistent-storage)
+          (persistent-soft-flush dynamic-fonts-use-persistent-storage)))
+      (when progress
+        (message "Font cache ... done")))))
 
 ;;;###autoload
 (defun dynamic-fonts-read-font-name (&optional ido)
@@ -480,91 +565,6 @@ order of preference:
           (set-face-attribute face nil :family font-name)
           (when point-size
             (set-face-attribute face nil :height (round (* 10 point-size)))))))))
-
-(defun dynamic-fonts-create-fuzzy-matches (font-name &optional keep-size)
-  "Return a list of approximate matches to FONT-NAME.
-
-If KEEP-SIZE is set, do not strip point sizes in the form
-
-   Font Name-pointsize"
-  (let ((case-fold-search  nil)
-        (font-name-uncamel nil)
-        (fuzzy-match-list (list font-name)))
-    (setq font-name (replace-regexp-in-string "\\`[ \t_]+" ""
-                       (replace-regexp-in-string "[ \t_]+\\'" ""
-                          (replace-regexp-in-string ":[^:]*\\'" ""
-                                font-name))))
-    (unless keep-size
-      (setq font-name (replace-regexp-in-string "[ \t]*-[0-9.]+\\'" "" font-name)))
-    (setq font-name-uncamel (replace-regexp-in-string "\\([a-z]\\)\\([A-Z]\\)" "\\1 \\2" font-name))
-    (push font-name                                                   fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t_]+"  ""  font-name        ) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t]"    "_" font-name        ) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t_]+"  " " font-name        ) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t_]+"  "_" font-name        ) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t]"    "-" font-name        ) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t]+"   "-" font-name        ) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t_-]+" "-" font-name        ) fuzzy-match-list)
-    (push font-name-uncamel                                           fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t]"    "_" font-name-uncamel) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t_]+"  " " font-name-uncamel) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t_]+"  "_" font-name-uncamel) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t]"    "-" font-name-uncamel) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t]+"   "-" font-name-uncamel) fuzzy-match-list)
-    (push (replace-regexp-in-string "[ \t_-]+" "-" font-name-uncamel) fuzzy-match-list)
-    (setq fuzzy-match-list (nreverse fuzzy-match-list))
-    (delete-dups fuzzy-match-list)
-    (remove-if-not #'(lambda (x) (string-match-p "[^ \t]" x)) fuzzy-match-list)))
-
-(defun dynamic-fonts-load-font-names (&optional progress regenerate)
-  "Populate the hash `dynamic-fonts-font-names'.
-
-When optional PROGRESS is true, show progress feedback in the
-echo area.
-
-When optional REGENERATE is true, always rebuild from
-scratch."
-  (when (display-multi-font-p)
-    (when regenerate
-      (setq dynamic-fonts-font-names nil)
-      (persistent-soft-store (intern (format "checksum-%s" window-system))
-                             nil dynamic-fonts-use-persistent-storage)
-      (persistent-soft-store (intern (format "font-names-%s" window-system))
-                             nil dynamic-fonts-use-persistent-storage)
-      (persistent-soft-flush dynamic-fonts-use-persistent-storage))
-    (unless (or (hash-table-p dynamic-fonts-font-names)
-                (not dynamic-fonts-use-memory-cache))
-      (when progress
-        (message "Font cache ... checking"))
-      (let* ((old-checksum (persistent-soft-fetch (intern (format "checksum-%s" window-system)) dynamic-fonts-use-persistent-storage))
-             (listing (dynamic-fonts-list-font-names))
-             (new-checksum (md5 (mapconcat 'identity (sort listing 'string<) "") nil nil 'utf-8))
-             (dupes nil))
-        (when (equal old-checksum new-checksum)
-          (setq dynamic-fonts-font-names (persistent-soft-fetch
-                                          (intern (format "font-names-%s" window-system))
-                                          dynamic-fonts-use-persistent-storage)))
-        (unless (hash-table-p dynamic-fonts-font-names)
-          (when progress
-            (message "Font cache ... rebuilding"))
-          (setq dynamic-fonts-font-names (make-hash-table :size (* 5 (length listing)) :test 'equal))
-          (dolist (font-name listing)
-            (dolist (fuzzy-name (dynamic-fonts-create-fuzzy-matches font-name))
-              (callf upcase fuzzy-name)
-              (when (and (gethash fuzzy-name dynamic-fonts-font-names)
-                         (not (equal (gethash fuzzy-name dynamic-fonts-font-names) font-name)))
-                (push fuzzy-name dupes))
-              (puthash (upcase fuzzy-name) font-name dynamic-fonts-font-names)))
-          (delete-dups dupes)
-          (dolist (fuzzy-name dupes)
-            (remhash fuzzy-name dynamic-fonts-font-names))
-          (persistent-soft-store (intern (format "checksum-%s" window-system))
-                                 new-checksum dynamic-fonts-use-persistent-storage)
-          (persistent-soft-store (intern (format "font-names-%s" window-system))
-                                 dynamic-fonts-font-names dynamic-fonts-use-persistent-storage)
-          (persistent-soft-flush dynamic-fonts-use-persistent-storage)))
-      (when progress
-        (message "Font cache ... done")))))
 
 ;;; interactive commands
 

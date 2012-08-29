@@ -42,6 +42,8 @@
 ;;
 ;;     Requires persistent-soft.el
 ;;
+;;     Uses if present: memoize.el
+;; 
 ;; Bugs
 ;;
 ;;    Checking for font availability is slow on most systems.  This

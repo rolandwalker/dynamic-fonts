@@ -3,7 +3,8 @@
 ;; Copyright (c) 2012 Roland Walker
 ;;
 ;; Author: Roland Walker walker@pobox.com
-;; URL: https://github.com/rolandwalker/dynamic-fonts.el
+;; Homepage: http://github.com/rolandwalker/dynamic-fonts
+;; URL: http://raw.github.com/rolandwalker/dynamic-fonts/master/dynamic-fonts.el
 ;; Version: 0.5.4
 ;; Last-Updated: 28 Aug 2012
 ;; EmacsWiki: DynamicFonts

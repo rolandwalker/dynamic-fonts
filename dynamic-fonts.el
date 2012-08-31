@@ -44,7 +44,7 @@
 ;;     Requires persistent-soft.el
 ;;
 ;;     Uses if present: memoize.el
-;; 
+;;
 ;; Bugs
 ;;
 ;;    Checking for font availability is slow on most systems.  This
@@ -135,8 +135,8 @@
 
 (defcustom dynamic-fonts-less-feedback nil
   "Give less echo area feedback."
-  :group 'dynamic-fonts
-  :type 'boolean)
+  :type 'boolean
+  :group 'dynamic-fonts)
 
 (defcustom dynamic-fonts-use-persistent-storage "dynamic-fonts"
   "Use persistent disk storage when available.

@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (c) 2012 Roland Walker
 ;;
-;; Author: Roland Walker walker@pobox.com
+;; Author: Roland Walker <walker@pobox.com>
 ;; Homepage: http://github.com/rolandwalker/dynamic-fonts
 ;; URL: http://raw.github.com/rolandwalker/dynamic-fonts/master/dynamic-fonts.el
 ;; Version: 0.5.4

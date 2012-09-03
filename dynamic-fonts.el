@@ -131,7 +131,7 @@
   :version "0.5.4"
   :link '(emacs-commentary-link "dynamic-fonts")
   :prefix "dynamic-fonts-"
-  :group 'extensions)
+  :group 'faces)
 
 (defcustom dynamic-fonts-less-feedback nil
   "Give less echo area feedback."

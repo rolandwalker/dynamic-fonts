@@ -175,7 +175,7 @@ the pathological case with regard to startup time."
 
 It is best to keep this list small, and let other proportional
 faces inherit from these faces."
-  :type '(repeat symbol)
+  :type '(repeat face)
   :group 'dynamic-fonts)
 
 (defcustom dynamic-fonts-set-monospace-faces '(fixed-pitch default)
@@ -183,7 +183,7 @@ faces inherit from these faces."
 
 It is best to keep this list small, and let other monospace
 faces inherit from these faces."
-  :type '(repeat symbol)
+  :type '(repeat face)
   :group 'dynamic-fonts)
 
 (defcustom dynamic-fonts-set-alternatives t

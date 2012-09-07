@@ -15,21 +15,25 @@
 ;;
 ;;; Commentary:
 ;;
+;; Quickstart
+;;
+;;     (require 'dynamic-fonts)
+;;
+;;     (dynamic-fonts-setup)     ; finds "best" fonts and sets faces:
+;;                               ; default, fixed-pitch, variable-pitch
+;;
+;; Explanation
+;;
 ;; Dynamic-fonts.el makes font configuration more portable between
 ;; machines.  When Emacs is starting up, dynamic-fonts chooses fonts
-;; for your basic faces based on which fonts are actually available.
+;; for your basic faces based on which fonts are actually available
+;; on your system.
 ;;
 ;; You may set a list of fonts in order of preference using customize.
 ;;
-;; To use dynamic-fonts, place the dynamic-fonts.el file somewhere
-;; Emacs can find it, and add the following to your ~/.emacs file:
-;;
-;;    (require 'dynamic-fonts)
-;;    (dynamic-fonts-setup)
-;;
 ;; See Also
 ;;
-;;    M-x customize-group RET dynamic-fonts RET
+;;     M-x customize-group RET dynamic-fonts RET
 ;;
 ;; Notes
 ;;
@@ -47,24 +51,24 @@
 ;;
 ;; Bugs
 ;;
-;;    Checking for font availability is slow on most systems.  This
-;;    library can add up to several seconds to startup time.  Workaround:
-;;    where supported, font information can be cached to disk.
+;;     Checking for font availability is slow on most systems.  This
+;;     library can add up to several seconds to startup time.  Workaround:
+;;     where supported, font information can be cached to disk.
 ;;
-;;    dynamic-fonts-font-exists-p only supports two styles of font
-;;    name. This page
+;;     dynamic-fonts-font-exists-p only supports two styles of font
+;;     name. This page
 ;;
-;;       http://www.gnu.org/software/emacs/manual/html_node/emacs/Fonts.html#Fonts
+;;         http://www.gnu.org/software/emacs/manual/html_node/emacs/Fonts.html#Fonts
 ;;
-;;    describes four styles of font name.
+;;     describes four styles of font name.
 ;;
 ;; TODO
 ;;
-;;    test whether (find-font (font-spec :name "Name")) is faster
-;;    than font-info
+;;     test whether (find-font (font-spec :name "Name")) is faster
+;;     than font-info
 ;;
-;;    dynamic-fonts-create-fuzzy-matches not exhaustive enough to
-;;    catch all typos
+;;     dynamic-fonts-create-fuzzy-matches not exhaustive enough to
+;;     catch all typos
 ;;
 ;;; License
 ;;

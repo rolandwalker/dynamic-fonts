@@ -28,7 +28,8 @@ utility functions to be called from Lisp.  See in particular
 
 Compatibility and Requirements
 ------------------------------
-Tested only on GNU Emacs version 24.1
+
+Tested on GNU Emacs versions 23.3 and 24.1
 
 Requires [persistent-soft.el](http://github.com/rolandwalker/persistent-soft)
 

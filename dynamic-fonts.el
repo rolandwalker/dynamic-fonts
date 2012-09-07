@@ -5,8 +5,8 @@
 ;; Author: Roland Walker <walker@pobox.com>
 ;; Homepage: http://github.com/rolandwalker/dynamic-fonts
 ;; URL: http://raw.github.com/rolandwalker/dynamic-fonts/master/dynamic-fonts.el
-;; Version: 0.5.4
-;; Last-Updated: 28 Aug 2012
+;; Version: 0.6.0
+;; Last-Updated: 7 Sep 2012
 ;; EmacsWiki: DynamicFonts
 ;; Keywords: faces, frames
 ;; Package-Requires: ((persistent-soft "0.8.0") (pcache "0.2.3"))
@@ -132,7 +132,7 @@
 ;;;###autoload
 (defgroup dynamic-fonts nil
   "Set faces based on available fonts."
-  :version "0.5.4"
+  :version "0.6.0"
   :link '(emacs-commentary-link "dynamic-fonts")
   :prefix "dynamic-fonts-"
   :group 'faces)

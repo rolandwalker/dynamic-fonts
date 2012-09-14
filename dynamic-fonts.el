@@ -564,9 +564,10 @@ order of preference:
                               (match-string-no-properties 1 font-name))))
           (setq font-name (dynamic-fonts-first-existing-font (list font-name))) ; normalize
           (when (eq face 'default)
-            (if (< emacs-major-version 24)
-                (set-frame-font font-name t)
-              (set-frame-font font-name t t)))
+            (let ((args (list t t)))
+              (when (< emacs-major-version 24)
+                (pop args))
+              (apply 'set-frame-font font-name args)))
           (set-face-attribute face nil :family font-name)
           (when point-size
             (set-face-attribute face nil :height (round (* 10 point-size)))))))))

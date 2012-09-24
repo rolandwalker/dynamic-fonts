@@ -20,6 +20,8 @@ TEST_DEP_2=pcache
 TEST_DEP_2_URL=https://raw.github.com/sigma/pcache/fa8f863546e2e8f2fc0a70f5cc766a7f584e01b6/pcache.el
 TEST_DEP_3=persistent-soft
 TEST_DEP_3_URL=https://raw.github.com/rolandwalker/persistent-soft/374a63e3cf116f5d2902aa8b253b8c9de298f0a4/persistent-soft.el
+TEST_DEP_4=font-utils
+TEST_DEP_4_URL=https://raw.github.com/rolandwalker/font-utils/2740e21b3768bcd811a6009aa55a22b81cce9936/font-utils.el
 
 build :
 	$(EMACS) $(EMACS_FLAGS) --eval             \
@@ -53,10 +55,23 @@ test-dep-3 :
 	      (require '$(TEST_DEP_3)))"                  || \
 	(echo "Can't load test dependency $(TEST_DEP_3).el, run 'make downloads' to fetch it" ; exit 1)
 
+test-dep-4 :
+	@cd $(TEST_DIR)                                   && \
+	$(EMACS) $(EMACS_FLAGS)  -L . -L .. --eval           \
+	    "(progn                                          \
+	      (setq package-load-list '(($(TEST_DEP_2) t)    \
+	                                ($(TEST_DEP_3) t)    \
+	                                ($(TEST_DEP_4) t)))  \
+	      (when (fboundp 'package-initialize)            \
+	       (package-initialize))                         \
+	      (require '$(TEST_DEP_4)))"                  || \
+	(echo "Can't load test dependency $(TEST_DEP_4).el, run 'make downloads' to fetch it" ; exit 1)
+
 downloads :
 	$(CURL) '$(TEST_DEP_1_URL)' > $(TEST_DIR)/$(TEST_DEP_1).el
 	$(CURL) '$(TEST_DEP_2_URL)' > $(TEST_DIR)/$(TEST_DEP_2).el
 	$(CURL) '$(TEST_DEP_3_URL)' > $(TEST_DIR)/$(TEST_DEP_3).el
+	$(CURL) '$(TEST_DEP_4_URL)' > $(TEST_DIR)/$(TEST_DEP_4).el
 
 autoloads :
 	$(EMACS) $(EMACS_FLAGS) --eval                       \
@@ -67,7 +82,7 @@ autoloads :
 test-autoloads : autoloads
 	@$(EMACS) $(EMACS_FLAGS) -l "./$(AUTOLOADS_FILE)" || echo "failed to load autoloads: $(AUTOLOADS_FILE)"
 
-test : build test-dep-1 test-dep-2 test-dep-3 test-autoloads
+test : build test-dep-1 test-dep-2 test-dep-3 test-dep-4 test-autoloads
 	@cd $(TEST_DIR)                                   && \
 	(for test_lib in *-test.el; do                       \
 	    $(EMACS) $(EMACS_FLAGS) -L . -L .. -l cl -l $(TEST_DEP_1) -l $$test_lib --eval \
@@ -77,5 +92,6 @@ test : build test-dep-1 test-dep-2 test-dep-3 test-autoloads
 	done)
 
 clean :
-	@rm -f $(AUTOLOADS_FILE) *.elc *~ */*.elc */*~ $(TEST_DIR)/$(TEST_DEP_1).el $(TEST_DIR)/$(TEST_DEP_2).el $(TEST_DIR)/$(TEST_DEP_3).el
+	@rm -f $(AUTOLOADS_FILE) *.elc *~ */*.elc */*~ $(TEST_DIR)/$(TEST_DEP_1).el $(TEST_DIR)/$(TEST_DEP_2).el \
+	 $(TEST_DIR)/$(TEST_DEP_3).el $(TEST_DIR)/$(TEST_DEP_4).el
 	@rm -rf '$(TEST_DIR)/$(TEST_DATADIR)'

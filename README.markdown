@@ -26,17 +26,11 @@ See Also
 --------
 
 M-x customize-group RET dynamic-fonts RET
-
-Notes
------
-
-The secondary purpose of this library is to provide some font
-utility functions to be called from Lisp.  See in particular
-`dynamic-fonts-font-exists-p`, which tests font availability.
+M-x customize-group RET font-utils RET
 
 Compatibility and Requirements
 ------------------------------
 
 Tested on GNU Emacs versions 23.3 and 24.1
 
-Requires [persistent-soft.el](http://github.com/rolandwalker/persistent-soft)
+Requires [font-utils.el](http://github.com/rolandwalker/font-utils)

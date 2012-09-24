@@ -47,8 +47,6 @@
 ;;
 ;;     Requires persistent-soft.el
 ;;
-;;     Uses if present: memoize.el
-;;
 ;; Bugs
 ;;
 ;;     Checking for font availability is slow on most systems.  This
@@ -113,15 +111,10 @@
 ;; for callf, callf2, gensym, intersection, remove-if-not
 (require 'cl)
 
-(require 'memoize nil t)
-
 (autoload 'persistent-soft-store     "persistent-soft" "Under SYMBOL, store VALUE in the LOCATION persistent data store."   t)
 (autoload 'persistent-soft-fetch     "persistent-soft" "Return the value for SYMBOL in the LOCATION persistent data store." t)
 (autoload 'persistent-soft-exists-p  "persistent-soft" "Return t if SYMBOL exists in the LOCATION persistent data store."   t)
 (autoload 'persistent-soft-flush     "persistent-soft" "Flush data for the LOCATION data store to disk."                    t)
-
-(declare-function memoize       "memoize.el")
-(declare-function memoize-wrap  "memoize.el")
 
 ;;; customizable variables
 
@@ -266,30 +259,14 @@ default for fixed-width faces."
 ;; note: variable outside dynamic-fonts- namespace
 (defvar font-name-history nil "History of font names entered in the minibuffer.")
 
-(defvar dynamic-fonts-font-names nil "Hash of all font names.")
+(defvar dynamic-fonts-font-names nil
+  "Hash of all font names.")
 
-;;; compatibility functions
+(defvar dynamic-fonts-list-font-names-mem nil
+  "Memoization data for `dynamic-fonts-list-font-names'.")
 
-(unless (fboundp 'memoize)
-  ;; by Christopher Wellons <mosquitopsu@gmail.com>
-  (defun memoize (func)
-    "Memoize the given function. If argument is a symbol then
-install the memoized function over the original function."
-    (typecase func
-      (symbol (fset func (memoize-wrap (symbol-function func))) func)
-      (function (memoize-wrap func))))
-  (defun memoize-wrap (func)
-    "Return the memoized version of the given function."
-    (let ((table-sym (gensym))
-          (val-sym (gensym))
-          (args-sym (gensym)))
-      (set table-sym (make-hash-table :test 'equal))
-      `(lambda (&rest ,args-sym)
-         ,(concat (documentation func) "\n(memoized function)")
-         (let ((,val-sym (gethash ,args-sym ,table-sym)))
-           (if ,val-sym
-               ,val-sym
-             (puthash ,args-sym (apply ,func ,args-sym) ,table-sym)))))))
+(defvar dynamic-fonts-font-exists-p-mem (make-hash-table :test 'equal)
+  "Memoization data for `dynamic-fonts-font-exists-p'.")
 
 ;;; utility functions
 
@@ -350,8 +327,10 @@ If KEEP-SIZE is set, do not strip point sizes in the form
 (defun dynamic-fonts-list-font-names ()
   "Return a list of all font names on the current system."
   (when (display-multi-font-p)
-    (delete-dups (remove "nil" (remq nil (font-family-list))))))
-(memoize 'dynamic-fonts-list-font-names)
+    (if dynamic-fonts-list-font-names-mem
+        dynamic-fonts-list-font-names-mem
+      (setq dynamic-fonts-list-font-names-mem
+            (delete-dups (remove "nil" (remq nil (font-family-list))))))))
 
 (defun dynamic-fonts-load-font-names (&optional progress regenerate)
   "Populate the hash `dynamic-fonts-font-names'.
@@ -449,12 +428,17 @@ leniently modified before passing to `font-info'.
 Optional SCOPE is a list of font names, within which FONT-NAME
 must \(leniently\) match."
   (when (display-multi-font-p)
+    (let ((args (list font-name point-size strict scope)))
+      (if (gethash args dynamic-fonts-font-exists-p-mem)
+          (gethash args dynamic-fonts-font-exists-p-mem)
+        ;; else
     (save-match-data
       (when (fontp font-name 'font-spec)
         (when (and (floatp (font-get font-name :size))
                    (not point-size))
           (setq point-size (font-get font-name :size)))
         (setq font-name (or (font-get font-name :name) (font-get font-name :family))))
+          (puthash args
       (cond
         ((fontp font-name 'font-entity)
          (font-info font-name))
@@ -512,8 +496,8 @@ must \(leniently\) match."
                                 (find-font (font-spec :family name))) ; default face on font-info failure
                             (or (not (numberp point-size))
                                 (= point-size (aref font-vec 2))))
-                   (throw 'font font-vec)))))))))))
-(memoize 'dynamic-fonts-font-exists-p)
+                                (throw 'font font-vec))))))))
+                   dynamic-fonts-font-exists-p-mem))))))
 
 ;;;###autoload
 (defun dynamic-fonts-first-existing-font (font-names &optional no-normalize)

@@ -234,10 +234,10 @@ order of preference:
 The font face and size is determined dynamically, by comparing
 the following values
 
-   `dynamic-fonts-preferred-monospace-fonts'
-   `dynamic-fonts-preferred-monospace-point-size'
-   `dynamic-fonts-preferred-proportional-fonts'
-   `dynamic-fonts-preferred-proportional-point-size'
+    `dynamic-fonts-preferred-monospace-fonts'
+    `dynamic-fonts-preferred-monospace-point-size'
+    `dynamic-fonts-preferred-proportional-fonts'
+    `dynamic-fonts-preferred-proportional-point-size'
 
 with the fonts available on your system.
 

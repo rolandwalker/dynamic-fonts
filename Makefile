@@ -13,6 +13,9 @@ INTERACTIVE_EMACS=/usr/local/bin/emacs
 # INTERACTIVE_EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 # INTERACTIVE_EMACS=/Applications/Emacs.app/Contents/MacOS/bin/emacs
 
+RESOLVED_EMACS=$(shell readlink `which $(EMACS)` || echo "$(EMACS)")
+RESOLVED_INTERACTIVE_EMACS=$(shell readlink `which "$(INTERACTIVE_EMACS)"` || echo "$(INTERACTIVE_EMACS)")
+
 EMACS_CLEAN=-Q
 EMACS_BATCH=$(EMACS_CLEAN) --batch
 TESTS=
@@ -44,19 +47,19 @@ TEST_DEP_4_LATEST_URL=https://raw.github.com/rolandwalker/font-utils/master/font
          test-dep-7 test-dep-8 test-dep-9
 
 build :
-	$(EMACS) $(EMACS_BATCH) --eval             \
+	$(RESOLVED_EMACS) $(EMACS_BATCH) --eval    \
 	    "(progn                                \
 	      (setq byte-compile-error-on-warn t)  \
 	      (batch-byte-compile))" *.el
 
 test-dep-1 :
-	@cd $(TEST_DIR)                                      && \
-	$(EMACS) $(EMACS_BATCH)  -L . -L .. -l $(TEST_DEP_1) || \
+	@cd $(TEST_DIR)                                               && \
+	$(RESOLVED_EMACS) $(EMACS_BATCH)  -L . -L .. -l $(TEST_DEP_1) || \
 	(echo "Can't load test dependency $(TEST_DEP_1).el, run 'make downloads' to fetch it" ; exit 1)
 
 test-dep-2 :
 	@cd $(TEST_DIR)                                   && \
-	$(EMACS) $(EMACS_BATCH)  -L . -L .. --eval           \
+	$(RESOLVED_EMACS) $(EMACS_BATCH)  -L . -L .. --eval  \
 	    "(progn                                          \
 	      (setq package-load-list '(($(TEST_DEP_2) t)))  \
 	      (when (fboundp 'package-initialize)            \
@@ -66,7 +69,7 @@ test-dep-2 :
 
 test-dep-3 :
 	@cd $(TEST_DIR)                                   && \
-	$(EMACS) $(EMACS_BATCH)  -L . -L .. --eval           \
+	$(RESOLVED_EMACS) $(EMACS_BATCH)  -L . -L .. --eval  \
 	    "(progn                                          \
 	      (setq package-load-list '(($(TEST_DEP_2) t)    \
 	                                ($(TEST_DEP_3) t)))  \
@@ -77,7 +80,7 @@ test-dep-3 :
 
 test-dep-4 :
 	@cd $(TEST_DIR)                                   && \
-	$(EMACS) $(EMACS_BATCH)  -L . -L .. --eval           \
+	$(RESOLVED_EMACS) $(EMACS_BATCH)  -L . -L .. --eval  \
 	    "(progn                                          \
 	      (setq package-load-list '(($(TEST_DEP_2) t)    \
 	                                ($(TEST_DEP_3) t)    \
@@ -100,13 +103,13 @@ downloads-latest :
 	$(CURL) '$(TEST_DEP_4_LATEST_URL)' > $(TEST_DIR)/$(TEST_DEP_4).el
 
 autoloads :
-	$(EMACS) $(EMACS_BATCH) --eval                       \
+	$(RESOLVED_EMACS) $(EMACS_BATCH) --eval              \
 	    "(progn                                          \
 	      (setq generated-autoload-file \"$(WORK_DIR)/$(AUTOLOADS_FILE)\") \
 	      (update-directory-autoloads \"$(WORK_DIR)\"))"
 
 test-autoloads : autoloads
-	@$(EMACS) $(EMACS_BATCH) -L . -l "./$(AUTOLOADS_FILE)"      || \
+	@$(RESOLVED_EMACS) $(EMACS_BATCH) -L . -l "./$(AUTOLOADS_FILE)" || \
 	 ( echo "failed to load autoloads: $(AUTOLOADS_FILE)" && false )
 
 test-travis :
@@ -120,7 +123,8 @@ test-prep : build test-dep-1 test-dep-2 test-dep-3 test-dep-4 test-autoloads tes
 test-batch :
 	@cd $(TEST_DIR)                                   && \
 	(for test_lib in *-test.el; do                       \
-	    $(EMACS) $(EMACS_BATCH) -L . -L .. -l cl -l $(TEST_DEP_1) -l $$test_lib --eval \
+	   $(RESOLVED_EMACS) $(EMACS_BATCH) -L . -L .. -l cl \
+	   -l $(TEST_DEP_1) -l $$test_lib --eval             \
 	    "(flet ((ert--print-backtrace (&rest args)       \
 	      (insert \"no backtrace in batch mode\")))      \
 	       (ert-run-tests-batch-and-exit '(and \"$(TESTS)\" (not (tag :interactive)))))" || exit 1; \
@@ -129,7 +133,7 @@ test-batch :
 test-interactive : test-prep
 	@cd $(TEST_DIR)                                               && \
 	(for test_lib in *-test.el; do                                   \
-	    $(INTERACTIVE_EMACS) $(EMACS_CLEAN) --eval                   \
+	    $(RESOLVED_INTERACTIVE_EMACS) $(EMACS_CLEAN) --eval          \
 	    "(progn                                                      \
 	      (cd \"$(WORK_DIR)/$(TEST_DIR)\")                           \
 	      (setq dired-use-ls-dired nil)                              \

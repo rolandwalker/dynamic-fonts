@@ -39,7 +39,7 @@ TEST_DEP_3=persistent-soft
 TEST_DEP_3_STABLE_URL=https://raw.github.com/rolandwalker/persistent-soft/de0d196c94a7d124d0acfa13228648d74cf2315f/persistent-soft.el
 TEST_DEP_3_LATEST_URL=https://raw.github.com/rolandwalker/persistent-soft/master/persistent-soft.el
 TEST_DEP_4=font-utils
-TEST_DEP_4_STABLE_URL=https://raw.github.com/rolandwalker/font-utils/89ef667af8bd4ea3b369f8bf1e53d6fd18ada570/font-utils.el
+TEST_DEP_4_STABLE_URL=https://raw.github.com/rolandwalker/font-utils/a7bda8bbc065480c85f0bd19cd1338627a5d3fc7/font-utils.el
 TEST_DEP_4_LATEST_URL=https://raw.github.com/rolandwalker/font-utils/master/font-utils.el
 
 .PHONY : build downloads downloads-latest autoloads test-autoloads test-travis \

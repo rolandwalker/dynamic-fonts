@@ -113,7 +113,7 @@ downloads :
 	$(CURL) '$(TEST_DEP_2_STABLE_URL)' > '$(TEST_DIR)/$(TEST_DEP_2).el'
 	$(CURL) '$(TEST_DEP_3_STABLE_URL)' > '$(TEST_DIR)/$(TEST_DEP_3).el'
 	$(CURL) '$(TEST_DEP_4_STABLE_URL)' > '$(TEST_DIR)/$(TEST_DEP_4).el'
-	$(CURL) '$(TEST_DEP_4_STABLE_URL)' > '$(TEST_DIR)/$(TEST_DEP_5).el'
+	$(CURL) '$(TEST_DEP_5_STABLE_URL)' > '$(TEST_DIR)/$(TEST_DEP_5).el'
 
 downloads-latest :
 	$(CURL) '$(TEST_DEP_1_LATEST_URL)' > '$(TEST_DIR)/$(TEST_DEP_1).el'

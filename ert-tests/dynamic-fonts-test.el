@@ -31,6 +31,7 @@
                    (dynamic-fonts-set-face 'unused-testing-face '("Courier"))
                    (face-attribute 'unused-testing-face :family)))))
 
+;;; dynamic-fonts-setup - todo interactive test with query
 
 ;;
 ;; Emacs

@@ -94,7 +94,7 @@
 ;;; Code:
 ;;
 
-;;; requires
+;;; requirements
 
 (autoload 'font-utils-first-existing-font "font-utils" "Return the (normalized) first existing font name from FONT-NAMES.")
 

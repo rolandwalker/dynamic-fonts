@@ -15,8 +15,8 @@ Quickstart
                           ; default, fixed-pitch, variable-pitch
 ```
 
-dynamic-fonts
--------------
+Explanation
+-----------
 
 Dynamic-fonts.el makes font configuration more portable between
 machines.  When Emacs is starting up, dynamic-fonts chooses fonts
@@ -28,8 +28,8 @@ You may set a list of fonts in order of preference using customize.
 See Also
 --------
 
-M-x customize-group RET dynamic-fonts RET
-M-x customize-group RET font-utils RET
+M-x customize-group RET dynamic-fonts RET  
+M-x customize-group RET font-utils RET  
 
 Compatibility and Requirements
 ------------------------------

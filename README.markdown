@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/rolandwalker/dynamic-fonts.png)](http://travis-ci.org/rolandwalker/dynamic-fonts)
+[![Build Status](https://secure.travis-ci.org/rolandwalker/dynamic-fonts.png?branch=master)](http://travis-ci.org/rolandwalker/dynamic-fonts)
 
 Overview
 ========

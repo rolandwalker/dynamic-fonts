@@ -104,7 +104,9 @@
 (defgroup dynamic-fonts nil
   "Set faces based on available fonts."
   :version "0.6.2"
-  :link '(emacs-commentary-link "dynamic-fonts")
+  :link '(emacs-commentary-link :tag "Commentary" "dynamic-fonts")
+  :link '(url-link :tag "Github" "http://github.com/rolandwalker/dynamic-fonts")
+  :link '(url-link :tag "EmacsWiki" "http://emacswiki.org/emacs/DynamicFonts")
   :prefix "dynamic-fonts-"
   :group 'faces)
 

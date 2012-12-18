@@ -224,7 +224,7 @@ order of preference:
           (setq font-name (font-utils-first-existing-font (list font-name))) ; normalize
           (when (eq face 'default)
             (let ((args (list t t)))
-              (when (< emacs-major-version 24)
+              (when (not (and (>= emacs-major-version 24) (>= emacs-minor-version 1)))
                 (pop args))
               (apply 'set-frame-font font-name args)))
           (set-face-attribute face nil :family font-name)

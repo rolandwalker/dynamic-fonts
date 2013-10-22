@@ -44,7 +44,7 @@ TEST_DEP_4=persistent-soft
 TEST_DEP_4_STABLE_URL=https://raw.github.com/rolandwalker/persistent-soft/3529e1c0264326ec9a5ab9e1ed35037012e7fbd6/persistent-soft.el
 TEST_DEP_4_LATEST_URL=https://raw.github.com/rolandwalker/persistent-soft/master/persistent-soft.el
 TEST_DEP_5=font-utils
-TEST_DEP_5_STABLE_URL=https://raw.github.com/rolandwalker/font-utils/a7bda8bbc065480c85f0bd19cd1338627a5d3fc7/font-utils.el
+TEST_DEP_5_STABLE_URL=https://raw.github.com/rolandwalker/font-utils/7352d5edeea215e5d95d8ef4fca095509b2e0f47/font-utils.el
 TEST_DEP_5_LATEST_URL=https://raw.github.com/rolandwalker/font-utils/master/font-utils.el
 
 .PHONY : build dist not-dirty pkg-version downloads downloads-latest autoloads \

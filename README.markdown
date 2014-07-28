@@ -24,8 +24,8 @@ You may set a list of fonts in order of preference using customize.
 
 ## See Also
 
-<kbd>M-x</kbd> <kbd>customize-group</kbd> <kbd>RET</kbd> <kbd>dynamic-fonts</kbd> <kbd>RET</kbd>
-<kbd>M-x</kbd> <kbd>customize-group</kbd> <kbd>RET</kbd> <kbd>font-utils</kbd> <kbd>RET</kbd>
+* <kbd>M-x</kbd> <kbd>customize-group</kbd> <kbd>RET</kbd> <kbd>dynamic-fonts</kbd> <kbd>RET</kbd>
+* <kbd>M-x</kbd> <kbd>customize-group</kbd> <kbd>RET</kbd> <kbd>font-utils</kbd> <kbd>RET</kbd>
 
 ## Compatibility and Requirements
 

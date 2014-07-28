@@ -8,7 +8,7 @@ Set Emacs faces based on available fonts.
 Quickstart
 ----------
 
-```lisp
+```elisp
 (require 'dynamic-fonts)
  
 (dynamic-fonts-setup)     ; finds "best" fonts and sets faces:

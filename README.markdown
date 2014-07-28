@@ -1,12 +1,10 @@
 [![Build Status](https://secure.travis-ci.org/rolandwalker/dynamic-fonts.png?branch=master)](http://travis-ci.org/rolandwalker/dynamic-fonts)
 
-Overview
-========
+# Overview
 
 Set Emacs faces based on available fonts.
 
-Quickstart
-----------
+## Quickstart
 
 ```elisp
 (require 'dynamic-fonts)
@@ -15,8 +13,7 @@ Quickstart
                           ; default, fixed-pitch, variable-pitch
 ```
 
-Explanation
------------
+## Explanation
 
 Dynamic-fonts.el makes font configuration more portable between
 machines.  When Emacs is starting up, dynamic-fonts chooses fonts
@@ -25,14 +22,12 @@ on your system.
 
 You may set a list of fonts in order of preference using customize.
 
-See Also
---------
+## See Also
 
 M-x customize-group RET dynamic-fonts RET  
 M-x customize-group RET font-utils RET  
 
-Compatibility and Requirements
-------------------------------
+## Compatibility and Requirements
 
 	GNU Emacs version 24.4-devel     : yes, at the time of writing
 	GNU Emacs version 24.3           : yes

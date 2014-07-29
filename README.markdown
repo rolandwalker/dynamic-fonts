@@ -20,7 +20,7 @@ machines.  When Emacs is starting up, dynamic-fonts chooses fonts
 for your basic faces based on which fonts are actually available
 on your system.
 
-You may set a list of fonts in order of preference using customize.
+You may set a list of fonts in order of preference using `customize`.
 
 ## See Also
 

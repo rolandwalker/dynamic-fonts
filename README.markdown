@@ -15,7 +15,7 @@ Set Emacs faces based on available fonts.
 
 ## Explanation
 
-Dynamic-fonts.el makes font configuration more portable between
+`dynamic-fonts.el` makes font configuration more portable between
 machines.  When Emacs is starting up, dynamic-fonts chooses fonts
 for your basic faces based on which fonts are actually available
 on your system.

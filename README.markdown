@@ -4,6 +4,11 @@
 
 Set Emacs faces based on available fonts.
 
+ * [Quickstart](#quickstart)
+ * [Explanation](#explanation)
+ * [See Also](#see-also)
+ * [Compatibility and Requirements](#compatibility-and-requirements)
+
 ## Quickstart
 
 ```elisp
@@ -24,8 +29,8 @@ You may set a list of fonts in order of preference using `customize`.
 
 ## See Also
 
-* <kbd>M-x</kbd> <kbd>customize-group</kbd> <kbd>RET</kbd> <kbd>dynamic-fonts</kbd> <kbd>RET</kbd>
-* <kbd>M-x</kbd> <kbd>customize-group</kbd> <kbd>RET</kbd> <kbd>font-utils</kbd> <kbd>RET</kbd>
+ * <kbd>M-x</kbd> <kbd>customize-group</kbd> <kbd>RET</kbd> <kbd>dynamic-fonts</kbd> <kbd>RET</kbd>
+ * <kbd>M-x</kbd> <kbd>customize-group</kbd> <kbd>RET</kbd> <kbd>font-utils</kbd> <kbd>RET</kbd>
 
 ## Compatibility and Requirements
 
